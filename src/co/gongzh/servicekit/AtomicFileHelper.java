@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * @author Gong Zhang
  */
-public class AtomicFileWriter {
+public class AtomicFileHelper {
 
     @NotNull
     public static Consumer<String> logger = System.err::println;
