@@ -20,18 +20,34 @@ import java.util.concurrent.Executors;
 public final class Log {
 
     private static Log shared = null;
+    private static LogFileResolver logFileResolver = null;
+    private static EventDispatch<File> onLogFileChange = null;
 
-    static synchronized boolean startupShared(@NotNull File logFile, @NotNull ZoneId zoneId) {
-        if (shared != null) {
-            shared.shutdown();
-        }
-        shared = new Log(logFile, zoneId);
+    static synchronized boolean startupShared(@NotNull LogFileResolver resolver) {
+        // shutdown
+        shutdownShared();
+
+        logFileResolver = resolver;
+        onLogFileChange = new EventDispatch<>("Log.onLogFileChange");
+        onLogFileChange.addObserver(e -> {
+            File file = e.arg;
+            if (file == null) {
+                file = logFileResolver.getCurrentLogFile();
+            }
+            switchSharedLogFile(file);
+        });
+
+        logFileResolver.onCreate(onLogFileChange);
+
+        shared = new Log(logFileResolver.getCurrentLogFile(), logFileResolver.getLogZoneId());
         try {
             shared.startup();
             return true;
         } catch (IOException e) {
             System.err.println("failed to start up log: " + e);
             shared = null;
+            logFileResolver = null;
+            onLogFileChange = null;
             return false;
         }
     }
@@ -40,67 +56,95 @@ public final class Log {
         if (shared != null) {
             shared.shutdown();
             shared = null;
+            logFileResolver = null;
+            onLogFileChange = null;
+        }
+    }
+
+    private static synchronized void switchSharedLogFile(@NotNull File newFile) {
+        if (shared != null && logFileResolver != null &&
+                !shared.getLogFile().equals(newFile)) {
+            shared.shutdown();
+            shared = new Log(newFile, logFileResolver.getLogZoneId());
+            try {
+                shared.startup();
+            } catch (IOException e) {
+                System.err.println("failed to start up log: " + e);
+                shared = null;
+                logFileResolver = null;
+                onLogFileChange = null;
+            }
+        }
+    }
+
+    @Nullable
+    private static synchronized Log determineLogIns() {
+        if (shared != null && logFileResolver != null) {
+            logFileResolver.onLog(); // may cause switching log file!
+            return shared;
+        } else {
+            return null;
         }
     }
 
     public static void i(@NotNull String tag, @NotNull String message) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.info(tag, message);
         }
     }
 
     public static void i(@NotNull String tag, @NotNull Exception ex) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.info(tag, ex);
         }
     }
 
     public static void i(@NotNull String tag, @Nullable String message, @NotNull Exception ex) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.info(tag, message, ex);
         }
     }
 
     public static void w(@NotNull String tag, @NotNull String message) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.warning(tag, message);
         }
     }
 
     public static void w(@NotNull String tag, @NotNull Exception ex) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.warning(tag, ex);
         }
     }
 
     public static void w(@NotNull String tag, @Nullable String message, @NotNull Exception ex) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.warning(tag, message, ex);
         }
     }
 
     public static void e(@NotNull String tag, @NotNull String message) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.error(tag, message);
         }
     }
 
     public static void e(@NotNull String tag, @NotNull Exception ex) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.error(tag, ex);
         }
     }
 
     public static void e(@NotNull String tag, @Nullable String message, @NotNull Exception ex) {
-        Log log = shared;
+        Log log = determineLogIns();
         if (log != null) {
             log.error(tag, message, ex);
         }

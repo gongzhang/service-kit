@@ -14,7 +14,7 @@ public final class App {
     private App() {}
 
     public static void main(@NotNull AppDelegate delegate) {
-        Log.startupShared(delegate.getLogFile(), delegate.getLogTimeZone());
+        Log.startupShared(delegate.getLogFileResolver());
 
         try {
             delegate.onStart();

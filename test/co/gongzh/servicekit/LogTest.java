@@ -1,8 +1,7 @@
 package co.gongzh.servicekit;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.jetbrains.annotations.NotNull;
+import org.junit.*;
 
 import java.io.File;
 import java.time.ZoneId;
@@ -16,13 +15,37 @@ public class LogTest {
 
     private static final String TAG = "LogTest";
 
-    @Before
-    public void setUp() throws Exception {
-        Log.startupShared(new File("log.txt"), ZoneId.systemDefault());
+    @BeforeClass
+    public static void setUp() throws Exception {
+        Log.startupShared(new LogFileResolver() {
+
+            EventDispatch<File> onLogFileChange;
+
+            int fileNum = 0;
+
+            @Override
+            public void onCreate(@NotNull EventDispatch<File> onLogFileChange) {
+                this.onLogFileChange = onLogFileChange;
+            }
+
+            @Override
+            public void onLog() {
+                if (fileNum > 0) {
+                    onLogFileChange.fire(getCurrentLogFile());
+                }
+                fileNum += 1;
+            }
+
+            @Override
+            public @NotNull File getCurrentLogFile() {
+                return new File("log" + fileNum + ".txt");
+            }
+
+        });
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         Log.shutdownShared();
     }
 

@@ -15,13 +15,8 @@ public interface AppDelegate {
     void onCommand(@NotNull String line);
 
     @NotNull
-    default ZoneId getLogTimeZone() {
-        return ZoneId.systemDefault();
-    }
-
-    @NotNull
-    default File getLogFile() {
-        return new File(".log");
+    default LogFileResolver getLogFileResolver() {
+        return () -> new File(".log");
     }
 
 }

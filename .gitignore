@@ -2,6 +2,3 @@
 *.jar
 .idea/
 target/
-
-# output
-log.txt
