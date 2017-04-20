@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -186,7 +186,7 @@ public final class Log {
                         if (writer != null) {
 
                             // generate timestamp
-                            String time = LocalDateTime.now(zoneId).toString();
+                            String time = OffsetDateTime.now(zoneId).toString();
 
                             try {
                                 for (String line : lines.split("\n")) {
