@@ -4,10 +4,11 @@ ServiceKit 是一个用来简化构建 Java 服务类应用程序的库。Servic
 - 程序生命周期管理
 - 日志
 - 全局线程池
+- 原子性的单文件读写
 - 异步服务
 - 周期性任务
 - 事件发布-订阅机制
-- 原子的文件读写
+
 
 ## 代码样例
 
@@ -15,7 +16,7 @@ ServiceKit 是一个用来简化构建 Java 服务类应用程序的库。Servic
 
 在主函数中使用 `App` 和 `AppDelegate` 来构造一个持续运行的服务程序：
 
-```Java
+```java
 public static void main(String[] args) {
     App.main(new AppDelegate() {
 
@@ -55,7 +56,7 @@ ServiceKit 会从标准输入流 `stdin` 读取用户命令，并持续运行，
 
 ServiceKit 提供一个非阻塞的日志工具类 `Log`。可以使用静态方法来输出程序日志：
 
-```Java
+```java
 Log.i("Main", "Hello!");
 Log.w("Main", "This is a warning.");
 Log.e("Main", "And this is an error.");
@@ -75,7 +76,7 @@ Log.e("Main", "And this is an error.");
 
 ServiceKit 管理了一个全局线程池，可以使用 `ThreadPool` 类来方便地执行异步操作。
 
-```Java
+```java
 ThreadPool.execute(() -> {
     // async code here...
 });
@@ -83,11 +84,20 @@ ThreadPool.execute(() -> {
 
 `ThreadPool` 只是 Java 标准库中 `Executor` 的一个简单封装，但 ServiceKit 会负责在程序结束时销毁它，因此你不需要手动执行销毁操作。
 
+### 4. 原子性的单文件读写
+
+
+
+- 异步服务
+- 周期性任务
+- 事件发布-订阅机制
+
+
 ## 安装
 
 ### Maven
 
-```maven
+```xml
 <dependency>
     <groupId>co.gongzh.servicekit</groupId>
     <artifactId>servicekit</artifactId>
@@ -97,6 +107,6 @@ ThreadPool.execute(() -> {
 
 ### Gradle
 
-```
+```gradle
 compile 'co.gongzh.servicekit:servicekit:1.0'
 ```
