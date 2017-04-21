@@ -1,12 +1,11 @@
 package co.gongzh.servicekit;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
-import java.time.ZoneId;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Gong Zhang
@@ -47,6 +46,10 @@ public class LogTest {
     @AfterClass
     public static void tearDown() throws Exception {
         Log.shutdownShared();
+        boolean ignored;
+        ignored = new File("log0.txt").delete();
+        ignored = new File("log1.txt").delete();
+        ignored = new File("log2.txt").delete();
     }
 
     @Test

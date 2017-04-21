@@ -235,6 +235,7 @@ public final class Log {
                             try {
                                 for (String line : lines.split("\n")) {
                                     if (line.isEmpty()) continue;
+                                    // NOTE: Do not change format. See LogParser.
                                     String msg = String.format(Locale.US, "%s  %c  %s \t%s\n", time, level, tag, line);
                                     if (level == 'e') {
                                         System.err.print(msg);
