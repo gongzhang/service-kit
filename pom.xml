@@ -6,7 +6,7 @@
 
     <groupId>co.gongzh.servicekit</groupId>
     <artifactId>servicekit</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.4</version>
 
     <name>servicekit</name>
     <description>A group of helper classes used to implement common Java service application.</description>

@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Gong Zhang
@@ -14,6 +16,7 @@ public final class App {
     private App() {}
 
     public static void main(@NotNull AppDelegate delegate) {
+        ThreadPool.initGlobal(delegate.createGlobalThreadPool());
         Log.startupShared(delegate.getLogFileResolver());
 
         try {
@@ -30,7 +33,10 @@ public final class App {
                 System.err.println("Uncaught exception in App.onStop: " + ex.toString());
             }
             Log.shutdownShared();
-            ThreadPool.shutdown();
+            ExecutorService pool = ThreadPool.getGlobalPool();
+            if (pool != null) {
+                delegate.purgeGlobalThreadPool(pool);
+            }
         }));
 
         // handle command line input

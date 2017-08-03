@@ -98,7 +98,7 @@ public abstract class Service {
      */
     protected final synchronized boolean async(@NotNull Runnable runnable) {
         if (started) {
-            ThreadPool.shared().execute(() -> {
+            ThreadPool.execute(() -> {
                 try {
                     runnable.run();
                 } catch (Exception ex) {

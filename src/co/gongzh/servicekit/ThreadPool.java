@@ -3,6 +3,8 @@ package co.gongzh.servicekit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,26 +15,29 @@ import java.util.concurrent.Executors;
 public final class ThreadPool {
 
     @Nullable
-    private static ExecutorService pool = Executors.newCachedThreadPool();
+    private static ExecutorService globalPool = null;
 
-    synchronized static void shutdown() {
-        if (pool != null) {
-            pool.shutdownNow();
-            pool = null;
+    synchronized static void initGlobal(@NotNull ExecutorService pool) {
+        ThreadPool.globalPool = pool;
+    }
+
+    synchronized static ExecutorService getGlobalPool() {
+        return globalPool;
+    }
+
+    public synchronized static void execute(@NotNull Runnable command) {
+        if (globalPool != null) {
+            globalPool.execute(command);
         }
     }
 
-    public synchronized static void execute(Runnable command) {
-        shared().execute(command);
-    }
-
     @NotNull
-    public synchronized static Executor shared() {
-        if (pool == null) {
-            // pool is already shutdown. create new thread instead.
-            return command -> new Thread(command).start();
+    public synchronized static Executor global() {
+        if (globalPool == null) {
+            // pool is already shutdown. returns placeholder.
+            return command -> {};
         } else {
-            return pool;
+            return globalPool;
         }
     }
 
