@@ -119,12 +119,12 @@ ThreadPool.execute(() -> {
 <dependency>
     <groupId>co.gongzh.servicekit</groupId>
     <artifactId>servicekit</artifactId>
-    <version>1.0</version>
+    <version>1.1.4</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-compile 'co.gongzh.servicekit:servicekit:1.0'
+compile 'co.gongzh.servicekit:servicekit:1.1.4'
 ```
