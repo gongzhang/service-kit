@@ -37,7 +37,7 @@ public abstract class TimerService extends Service {
             public void run() {
                 timerAction();
             }
-        }, 0, currentTimerPeriod);
+        }, getTimerStartDelay(), currentTimerPeriod);
     }
 
     @Override
@@ -88,6 +88,14 @@ public abstract class TimerService extends Service {
      */
     protected abstract long getTimerPeriod();
 
+    /**
+     * Indicates the delay of first timer event when start timer service.
+     * Returns 0 by default.
+     * @return delay in millisecond
+     */
+    protected long getTimerStartDelay() {
+        return 0;
+    }
 
     /**
      * Notify client to do periodical task. The implementation should
