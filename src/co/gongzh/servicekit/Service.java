@@ -15,7 +15,12 @@ public abstract class Service {
     @NotNull private final String tag;
     private boolean allowLog;
 
-    private boolean started;
+    enum ServiceState {
+        STOPPED, STARTING_UP, RUNNING, SHUTTING_DOWN
+    }
+
+    @NotNull
+    private ServiceState state;
 
     private final Set<String> taskIdentifiers;
 
@@ -26,7 +31,7 @@ public abstract class Service {
     protected Service(@NotNull String tag, @NotNull String serviceName) {
         this.tag = tag;
         this.serviceName = serviceName;
-        this.started = false;
+        this.state = ServiceState.STOPPED;
         this.taskIdentifiers = new HashSet<>();
     }
 
@@ -47,41 +52,49 @@ public abstract class Service {
     }
 
     public synchronized final boolean isStarted() {
-        return started;
+        return state != ServiceState.STOPPED;
     }
 
     public synchronized final boolean start() {
-        if (started) {
+        if (isStarted()) {
             if (allowLog) Log.e(tag, serviceName + " is already running.");
             return false;
         }
 
+        state = ServiceState.STARTING_UP;
+
         try {
             onServiceStart();
         } catch (Exception e) {
+            // failed to start up
+            state = ServiceState.STOPPED;
             if (allowLog) Log.e(tag, "Failed to start " + serviceName + ".", e);
             return false;
         }
 
-        started = true;
+        state = ServiceState.RUNNING;
         if (allowLog) Log.i(tag, serviceName + " started.");
         return true;
     }
 
     public synchronized final void stop() {
-        if (!started) {
+        if (state != ServiceState.RUNNING) {
             if (allowLog) Log.e(tag, serviceName + " is not running.");
             return;
         }
 
+        state = ServiceState.SHUTTING_DOWN;
+
         try {
             onServiceStop();
         } catch (Exception e) {
+            // failed to shut down
+            state = ServiceState.RUNNING;
             if (allowLog) Log.w(tag, "Error occurred when stop " + serviceName + ".", e);
         }
 
         taskIdentifiers.clear();
-        started = false;
+        state = ServiceState.STOPPED;
         if (allowLog) Log.i(tag, serviceName + " stopped.");
     }
 
@@ -91,13 +104,13 @@ public abstract class Service {
     /**
      * Executes a task asynchronously if and only if:
      * <ul>
-     *     <li>the service is running</li>
+     *     <li>the service is running, or during <code>onServiceStart()</code> and <code>onServiceStop()</code></li>
      * </ul>
      * @param runnable the task
      * @return {@code true} if the task is accepted
      */
     protected final synchronized boolean async(@NotNull Runnable runnable) {
-        if (started) {
+        if (isStarted()) {
             ThreadPool.execute(() -> {
                 try {
                     runnable.run();
@@ -114,7 +127,7 @@ public abstract class Service {
     /**
      * Executes a task asynchronously if and only if:
      * <ul>
-     *     <li>the service is running</li>
+     *     <li>the service is running, or during <code>onServiceStart()</code> and <code>onServiceStop()</code></li>
      *     <li>there is no running task with same identifier</li>
      * </ul>
      * Otherwise the task will be ignored.
@@ -132,7 +145,7 @@ public abstract class Service {
      * @return {@code true} if the task is accepted
      */
     protected final synchronized boolean asyncSingle(@NotNull String identifier, @NotNull Function<Runnable, Runnable> taskSupplier) {
-        if (!taskIdentifiers.contains(identifier)) {
+        if (isStarted() && !taskIdentifiers.contains(identifier)) {
 
             Runnable complete = () -> {
                 synchronized (Service.this) {
