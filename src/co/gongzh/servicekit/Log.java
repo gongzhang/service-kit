@@ -7,6 +7,9 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +25,30 @@ public final class Log {
     private static Log shared = null;
     private static LogFileResolver logFileResolver = null;
     private static EventDispatch<File> onLogFileChange = null;
+
+    @NotNull
+    private static DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendLiteral('T')
+            .appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .appendLiteral(':')
+            .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .appendLiteral(':')
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+            .appendLiteral('.')
+            .appendFraction(ChronoField.MILLI_OF_SECOND, 3, 3, false)
+            .appendOffsetId()
+            .toFormatter(Locale.US);
+
+    @NotNull
+    public static DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public static void setDateTimeFormatter(@NotNull DateTimeFormatter dateTimeFormatter) {
+        Log.dateTimeFormatter = dateTimeFormatter;
+    }
 
     static synchronized boolean startupShared(@NotNull LogFileResolver resolver) {
         // shutdown
@@ -230,7 +257,7 @@ public final class Log {
                         if (writer != null) {
 
                             // generate timestamp
-                            String time = OffsetDateTime.now(zoneId).toString();
+                            String time = OffsetDateTime.now(zoneId).format(dateTimeFormatter);
 
                             try {
                                 for (String line : lines.split("\n")) {
