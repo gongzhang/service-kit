@@ -25,6 +25,12 @@ public final class Log {
     private static Log shared = null;
     private static LogFileResolver logFileResolver = null;
     private static EventDispatch<File> onLogFileChange = null;
+    private static Filter filter = null;
+
+    @FunctionalInterface
+    public interface Filter {
+        boolean accept(@NotNull OffsetDateTime time, char level, @NotNull String tag, @NotNull String message);
+    }
 
     @NotNull
     private static DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
@@ -48,6 +54,15 @@ public final class Log {
 
     public static void setDateTimeFormatter(@NotNull DateTimeFormatter dateTimeFormatter) {
         Log.dateTimeFormatter = dateTimeFormatter;
+    }
+
+    @Nullable
+    public static Log.Filter getFilter() {
+        return filter;
+    }
+
+    public static void setFilter(@Nullable Log.Filter filter) {
+        Log.filter = filter;
     }
 
     static synchronized boolean startupShared(@NotNull LogFileResolver resolver) {
@@ -257,11 +272,19 @@ public final class Log {
                         if (writer != null) {
 
                             // generate timestamp
-                            String time = OffsetDateTime.now(zoneId).format(dateTimeFormatter);
+                            OffsetDateTime dateTime = OffsetDateTime.now(zoneId);
+                            String time = dateTime.format(dateTimeFormatter);
 
                             try {
                                 for (String line : lines.split("\n")) {
                                     if (line.isEmpty()) continue;
+
+                                    if (filter != null) {
+                                        if (!filter.accept(dateTime, level, tag, line)) {
+                                            continue;
+                                        }
+                                    }
+
                                     // NOTE: Do not change format. See LogParser.
                                     String msg = String.format(Locale.US, "%s  %c  %s \t%s\n", time, level, tag, line);
                                     if (level == 'e') {
