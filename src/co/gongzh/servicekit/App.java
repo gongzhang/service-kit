@@ -53,7 +53,7 @@ public final class App {
             } catch (IOException ignored) {
             }
 
-            Runtime.getRuntime().exit(0);
+            delegate.onStdinClose();
         });
 
         stdin_thread.setName("App.stdin");

@@ -18,6 +18,8 @@ public interface AppDelegate {
     void onStop();
     void onCommand(@NotNull String line);
 
+    default void onStdinClose() {}
+
     @NotNull
     default LogFileResolver getLogFileResolver() {
         return () -> new File(".log");
