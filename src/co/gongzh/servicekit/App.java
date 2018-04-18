@@ -19,8 +19,9 @@ public final class App {
         ThreadPool.initGlobal(delegate.createGlobalThreadPool());
         Log.startupShared(delegate.getLogFileResolver());
 
+        int statusCode = 0;
         try {
-            delegate.onStart();
+            statusCode = delegate.onStart();
         } catch (Exception ex) {
             System.err.println("Uncaught exception in App.onStart: " + ex.toString());
         }
@@ -59,6 +60,11 @@ public final class App {
         stdin_thread.setName("App.stdin");
         stdin_thread.setDaemon(false);
         stdin_thread.start();
+
+        if (statusCode != 0) {
+            System.err.println("App will exit with error code " + statusCode);
+            System.exit(statusCode);
+        }
     }
 
 }

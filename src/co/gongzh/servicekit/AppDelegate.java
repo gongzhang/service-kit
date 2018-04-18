@@ -14,7 +14,11 @@ import java.util.concurrent.Executors;
  */
 public interface AppDelegate {
 
-    void onStart();
+    /**
+     * @return status code. (<code>0</code> means the app is successfully started, while other
+     *         values are error code that will be returned to system.)
+     */
+    int onStart();
     void onStop();
     void onCommand(@NotNull String line);
 
