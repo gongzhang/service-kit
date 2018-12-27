@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -205,7 +206,7 @@ public final class Log {
     public Log(@NotNull File logFile, @NotNull ZoneId zoneId) {
         this.logFile = logFile;
         this.zoneId = zoneId;
-        this.charset = Charset.forName("UTF-8");
+        this.charset = StandardCharsets.UTF_8;
         this.tasks = Collections.synchronizedList(new ArrayList<>());
     }
 
@@ -352,12 +353,12 @@ public final class Log {
     @Nullable
     private String getExceptionMessage(@NotNull Exception ex) {
         try (ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(stream, "UTF-8")) {
+            OutputStreamWriter osw = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
             PrintWriter writer = new PrintWriter(osw);
             ex.printStackTrace(writer);
             writer.flush();
             byte[] bytes = stream.toByteArray();
-            return new String(bytes, "UTF-8");
+            return new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException ignored) {
             return null;
         }

@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -88,7 +89,7 @@ public final class Networks {
     public static JSONResponse requestJSON(@NotNull String urlString, @NotNull String method, @Nullable Map<String, String> headers, @Nullable Object body) throws Exception {
         byte[] data = null;
         if (body != null) {
-            data = body.toString().getBytes("UTF-8");
+            data = body.toString().getBytes(StandardCharsets.UTF_8);
         }
         if (headers != null) {
             headers = new HashMap<>(headers);
@@ -99,7 +100,7 @@ public final class Networks {
         headers.put("Accept", "application/json");
         Response resp = request(urlString, method, headers, data);
         JSONResponse jr = new JSONResponse(resp);
-        String jsonText = new String(resp.data, Charset.forName("UTF-8"));
+        String jsonText = new String(resp.data, StandardCharsets.UTF_8);
         try {
             jr.json = new JSONArray(jsonText);
         } catch (JSONException ignored) {

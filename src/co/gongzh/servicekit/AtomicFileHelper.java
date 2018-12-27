@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
@@ -65,7 +66,7 @@ public class AtomicFileHelper {
     }
 
     public static void writeUTF8(@NotNull final File file, @NotNull String text) throws IOException {
-        write(file, text.getBytes("UTF-8"));
+        write(file, text.getBytes(StandardCharsets.UTF_8));
     }
 
     public static void writeJSON(@NotNull final File file, @NotNull JSONObject object) throws IOException {
@@ -112,7 +113,7 @@ public class AtomicFileHelper {
     }
 
     public static <T> Optional<T> readUTF8(@NotNull final File file, @NotNull final Reader<String, T> reader) {
-        return read(file, data -> reader.read(new String(data, "UTF-8")));
+        return read(file, data -> reader.read(new String(data, StandardCharsets.UTF_8)));
     }
 
     public static <T> Optional<T> readJSON(@NotNull final File file, @NotNull final Reader<JSONObject, T> reader) {
