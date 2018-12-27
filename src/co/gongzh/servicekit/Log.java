@@ -28,6 +28,11 @@ public final class Log {
     private static EventDispatch<File> onLogFileChange = null;
     private static Filter filter = null;
 
+    private static final String ANSI_RED = "\033[0;31;1m";
+    private static final String ANSI_YELLOW = "\033[0;33;1m";
+    private static final String ANSI_GREEN = "\033[0;32;1m";
+    private static final String ANSI_NC = "\033[0m";
+
     @FunctionalInterface
     public interface Filter {
         boolean accept(@NotNull OffsetDateTime time, char level, @NotNull String tag, @NotNull String message);
@@ -287,13 +292,15 @@ public final class Log {
                                     }
 
                                     // NOTE: Do not change format. See LogParser.
-                                    String msg = String.format(Locale.US, "%s  %c  %s \t%s\n", time, level, tag, line);
+                                    String plain = String.format(Locale.US, "%s  %c  %s \t%s\n", time, level, tag, line);
+                                    String ansiColor = level == 'i' ? ANSI_GREEN : (level == 'w' ? ANSI_YELLOW : ANSI_RED);
+                                    String colorful = String.format(Locale.US, "%s  %s%c%s  %s \t%s\n", time, ansiColor, level, ANSI_NC, tag, line);
                                     if (level == 'e') {
-                                        System.err.print(msg);
+                                        System.err.print(colorful);
                                     } else {
-                                        System.out.print(msg);
+                                        System.out.print(colorful);
                                     }
-                                    writer.write(msg.getBytes(charset));
+                                    writer.write(plain.getBytes(charset));
                                 }
                                 writer.flush();
                             } catch (IOException ignored) {
